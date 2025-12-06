@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './stores/authStore'
-import MainLayout from './components/common/MainLayout'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
+import CompanyPage from './pages/CompanyPage'
+import EmployeePage from './pages/EmployeePage'
+import SkillCardPage from './pages/SkillCardPage'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -21,10 +23,20 @@ function App() {
         
         {/* 受保护路由 */}
         <Route path="/" element={
-          isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />
-        }>
-          <Route index element={<DashboardPage />} />
-        </Route>
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/dashboard" element={
+          isAuthenticated ? <DashboardPage /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/company" element={
+          isAuthenticated ? <CompanyPage /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/employees" element={
+          isAuthenticated ? <EmployeePage /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/skillcards" element={
+          isAuthenticated ? <SkillCardPage /> : <Navigate to="/login" replace />
+        } />
       </Routes>
     </BrowserRouter>
   )

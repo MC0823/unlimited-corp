@@ -1,4 +1,3 @@
-import { Outlet } from 'react-router-dom'
 import { Layout, Menu, Avatar, Dropdown, Typography, Button } from 'antd'
 import { 
   DashboardOutlined, 
@@ -15,16 +14,25 @@ import { useAuthStore } from '@/stores/authStore'
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
 
-export default function MainLayout() {
+interface MainLayoutProps {
+  children?: React.ReactNode
+}
+
+export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthStore()
 
   const menuItems = [
     {
-      key: '/',
+      key: '/dashboard',
       icon: <DashboardOutlined />,
       label: '驾驶舱',
+    },
+    {
+      key: '/company',
+      icon: <UserOutlined />,
+      label: '公司管理',
     },
     {
       key: '/employees',
@@ -32,7 +40,7 @@ export default function MainLayout() {
       label: '员工管理',
     },
     {
-      key: '/skills',
+      key: '/skillcards',
       icon: <ThunderboltOutlined />,
       label: '技能卡',
     },
@@ -134,8 +142,8 @@ export default function MainLayout() {
         </Header>
 
         {/* 主内容区 */}
-        <Content className="bg-gray-50">
-          <Outlet />
+        <Content className="bg-gray-50 p-6">
+          {children}
         </Content>
       </Layout>
     </Layout>
