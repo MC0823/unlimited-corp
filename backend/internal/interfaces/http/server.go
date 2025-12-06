@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	employeeApp "unlimited-corp/internal/application/employee"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
 	userApp "unlimited-corp/internal/application/user"
 	"unlimited-corp/internal/interfaces/http/api"
@@ -13,13 +14,15 @@ type Server struct {
 	engine           *gin.Engine
 	userService      *userApp.Service
 	skillCardService *skillcardApp.Service
+	employeeService  *employeeApp.Service
 }
 
 // NewServer 创建HTTP服务器
-func NewServer(userService *userApp.Service, skillCardService *skillcardApp.Service) *Server {
+func NewServer(userService *userApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service) *Server {
 	return &Server{
 		userService:      userService,
 		skillCardService: skillCardService,
+		employeeService:  employeeService,
 	}
 }
 
@@ -51,6 +54,10 @@ func (s *Server) Setup(mode string) *gin.Engine {
 	// 技能卡相关
 	skillCardHandler := api.NewSkillCardHandler(s.skillCardService)
 	skillCardHandler.RegisterRoutes(apiV1)
+
+	// 员工相关
+	employeeHandler := api.NewEmployeeHandler(s.employeeService)
+	employeeHandler.RegisterRoutes(apiV1)
 
 	return s.engine
 }
