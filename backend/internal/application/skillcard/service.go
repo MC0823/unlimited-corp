@@ -2,7 +2,9 @@ package skillcard
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 	"unlimited-corp/internal/domain/skillcard"
@@ -60,7 +62,7 @@ func (s *Service) Create(ctx context.Context, input *CreateInput) (*skillcard.Sk
 	}
 
 	if input.Icon != "" {
-		card.Icon = input.Icon
+		card.Icon = sql.NullString{String: input.Icon, Valid: true}
 	}
 
 	// Save to database
@@ -118,7 +120,7 @@ func (s *Service) List(ctx context.Context, input *ListInput) ([]*skillcard.Skil
 func (s *Service) ListSystemCards(ctx context.Context) ([]*skillcard.SkillCard, error) {
 	cards, err := s.repo.GetSystemCards(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to list system skill cards")
+		return nil, fmt.Errorf("failed to list system skill cards: %w", err)
 	}
 
 	return cards, nil
@@ -167,7 +169,7 @@ func (s *Service) Update(ctx context.Context, input *UpdateInput) (*skillcard.Sk
 	card.Update(input.Name, input.Description, skillcard.Category(input.Category))
 
 	if input.Icon != "" {
-		card.Icon = input.Icon
+		card.Icon = sql.NullString{String: input.Icon, Valid: true}
 	}
 
 	if input.KernelType != "" && input.KernelConfig != nil {

@@ -5,9 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
 	"unlimited-corp/internal/interfaces/http/middleware"
 	"unlimited-corp/pkg/errors"
+	"unlimited-corp/pkg/logger"
 )
 
 // SkillCardHandler handles skill card related HTTP requests
@@ -271,8 +273,11 @@ func handleSkillCardError(c *gin.Context, err error) {
 		return
 	}
 
+	// Log detailed error for debugging
+	logger.Error("SkillCard operation failed", zap.String("error", err.Error()))
+
 	c.JSON(http.StatusInternalServerError, gin.H{
 		"code":    500,
-		"message": "internal server error",
+		"message": err.Error(),
 	})
 }

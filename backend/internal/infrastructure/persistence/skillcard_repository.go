@@ -47,7 +47,13 @@ func (r *SkillCardRepository) Create(ctx context.Context, s *skillcard.SkillCard
 
 // GetByID retrieves a skill card by ID
 func (r *SkillCardRepository) GetByID(ctx context.Context, id uuid.UUID) (*skillcard.SkillCard, error) {
-	query := `SELECT * FROM skill_cards WHERE id = $1`
+	query := `
+		SELECT id, company_id, name, description, category, icon,
+		       kernel_type, kernel_config, input_schema, output_schema,
+		       is_system, is_public, version, usage_count, success_rate,
+		       created_at, updated_at
+		FROM skill_cards WHERE id = $1
+	`
 
 	var s skillcard.SkillCard
 	if err := r.db.GetContext(ctx, &s, query, id); err != nil {
@@ -63,7 +69,11 @@ func (r *SkillCardRepository) GetByID(ctx context.Context, id uuid.UUID) (*skill
 // GetByCompanyID retrieves all skill cards for a company (including system and public cards)
 func (r *SkillCardRepository) GetByCompanyID(ctx context.Context, companyID uuid.UUID) ([]*skillcard.SkillCard, error) {
 	query := `
-		SELECT * FROM skill_cards 
+		SELECT id, company_id, name, description, category, icon,
+		       kernel_type, kernel_config, input_schema, output_schema,
+		       is_system, is_public, version, usage_count, success_rate,
+		       created_at, updated_at
+		FROM skill_cards 
 		WHERE company_id = $1 
 		   OR is_system = true 
 		   OR is_public = true
@@ -80,7 +90,13 @@ func (r *SkillCardRepository) GetByCompanyID(ctx context.Context, companyID uuid
 
 // GetSystemCards retrieves all system preset skill cards
 func (r *SkillCardRepository) GetSystemCards(ctx context.Context) ([]*skillcard.SkillCard, error) {
-	query := `SELECT * FROM skill_cards WHERE is_system = true ORDER BY name ASC`
+	query := `
+		SELECT id, company_id, name, description, category, icon,
+		       kernel_type, kernel_config, input_schema, output_schema,
+		       is_system, is_public, version, usage_count, success_rate,
+		       created_at, updated_at
+		FROM skill_cards WHERE is_system = true ORDER BY name ASC
+	`
 
 	var cards []*skillcard.SkillCard
 	if err := r.db.SelectContext(ctx, &cards, query); err != nil {
@@ -92,7 +108,13 @@ func (r *SkillCardRepository) GetSystemCards(ctx context.Context) ([]*skillcard.
 
 // GetPublicCards retrieves all public skill cards
 func (r *SkillCardRepository) GetPublicCards(ctx context.Context) ([]*skillcard.SkillCard, error) {
-	query := `SELECT * FROM skill_cards WHERE is_public = true ORDER BY usage_count DESC, name ASC`
+	query := `
+		SELECT id, company_id, name, description, category, icon,
+		       kernel_type, kernel_config, input_schema, output_schema,
+		       is_system, is_public, version, usage_count, success_rate,
+		       created_at, updated_at
+		FROM skill_cards WHERE is_public = true ORDER BY usage_count DESC, name ASC
+	`
 
 	var cards []*skillcard.SkillCard
 	if err := r.db.SelectContext(ctx, &cards, query); err != nil {
@@ -157,7 +179,11 @@ func (r *SkillCardRepository) Delete(ctx context.Context, id uuid.UUID) error {
 // GetByCategory retrieves skill cards by category
 func (r *SkillCardRepository) GetByCategory(ctx context.Context, companyID uuid.UUID, category skillcard.Category) ([]*skillcard.SkillCard, error) {
 	query := `
-		SELECT * FROM skill_cards 
+		SELECT id, company_id, name, description, category, icon,
+		       kernel_type, kernel_config, input_schema, output_schema,
+		       is_system, is_public, version, usage_count, success_rate,
+		       created_at, updated_at
+		FROM skill_cards 
 		WHERE category = $1 
 		  AND (company_id = $2 OR is_system = true OR is_public = true)
 		ORDER BY is_system DESC, name ASC
@@ -174,7 +200,11 @@ func (r *SkillCardRepository) GetByCategory(ctx context.Context, companyID uuid.
 // Search searches skill cards by name or description
 func (r *SkillCardRepository) Search(ctx context.Context, companyID uuid.UUID, searchQuery string) ([]*skillcard.SkillCard, error) {
 	query := `
-		SELECT * FROM skill_cards 
+		SELECT id, company_id, name, description, category, icon,
+		       kernel_type, kernel_config, input_schema, output_schema,
+		       is_system, is_public, version, usage_count, success_rate,
+		       created_at, updated_at
+		FROM skill_cards 
 		WHERE (company_id = $1 OR is_system = true OR is_public = true)
 		  AND (name ILIKE $2 OR description ILIKE $2)
 		ORDER BY usage_count DESC, name ASC

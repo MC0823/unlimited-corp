@@ -1,6 +1,7 @@
 package skillcard
 
 import (
+	"database/sql"
 	"encoding/json"
 	"time"
 
@@ -29,23 +30,23 @@ const (
 
 // SkillCard represents a skill card entity
 type SkillCard struct {
-	ID           uuid.UUID       `json:"id" db:"id"`
-	CompanyID    *uuid.UUID      `json:"company_id,omitempty" db:"company_id"`
-	Name         string          `json:"name" db:"name"`
-	Description  string          `json:"description" db:"description"`
-	Category     Category        `json:"category" db:"category"`
-	Icon         string          `json:"icon" db:"icon"`
-	KernelType   KernelType      `json:"kernel_type" db:"kernel_type"`
-	KernelConfig json.RawMessage `json:"kernel_config" db:"kernel_config"`
-	InputSchema  json.RawMessage `json:"input_schema" db:"input_schema"`
-	OutputSchema json.RawMessage `json:"output_schema" db:"output_schema"`
-	IsSystem     bool            `json:"is_system" db:"is_system"`
-	IsPublic     bool            `json:"is_public" db:"is_public"`
-	Version      string          `json:"version" db:"version"`
-	UsageCount   int             `json:"usage_count" db:"usage_count"`
-	SuccessRate  float64         `json:"success_rate" db:"success_rate"`
-	CreatedAt    time.Time       `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time       `json:"updated_at" db:"updated_at"`
+	ID           uuid.UUID        `json:"id" db:"id"`
+	CompanyID    *uuid.UUID       `json:"company_id,omitempty" db:"company_id"`
+	Name         string           `json:"name" db:"name"`
+	Description  sql.NullString   `json:"description" db:"description"`
+	Category     Category         `json:"category" db:"category"`
+	Icon         sql.NullString   `json:"icon" db:"icon"`
+	KernelType   KernelType       `json:"kernel_type" db:"kernel_type"`
+	KernelConfig json.RawMessage  `json:"kernel_config" db:"kernel_config"`
+	InputSchema  json.RawMessage  `json:"input_schema" db:"input_schema"`
+	OutputSchema json.RawMessage  `json:"output_schema" db:"output_schema"`
+	IsSystem     bool             `json:"is_system" db:"is_system"`
+	IsPublic     bool             `json:"is_public" db:"is_public"`
+	Version      sql.NullString   `json:"version" db:"version"`
+	UsageCount   int              `json:"usage_count" db:"usage_count"`
+	SuccessRate  float64          `json:"success_rate" db:"success_rate"`
+	CreatedAt    time.Time        `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time        `json:"updated_at" db:"updated_at"`
 }
 
 // NewSkillCard creates a new skill card
@@ -61,7 +62,7 @@ func NewSkillCard(
 		ID:           uuid.New(),
 		CompanyID:    companyID,
 		Name:         name,
-		Description:  description,
+		Description:  sql.NullString{String: description, Valid: description != ""},
 		Category:     category,
 		KernelType:   kernelType,
 		KernelConfig: kernelConfig,
@@ -69,7 +70,7 @@ func NewSkillCard(
 		OutputSchema: json.RawMessage(`{"type": "object", "properties": {}}`),
 		IsSystem:     false,
 		IsPublic:     false,
-		Version:      "1.0.0",
+		Version:      sql.NullString{String: "1.0.0", Valid: true},
 		UsageCount:   0,
 		SuccessRate:  1.0,
 		CreatedAt:    time.Now(),
@@ -83,7 +84,7 @@ func (s *SkillCard) Update(name, description string, category Category) {
 		s.Name = name
 	}
 	if description != "" {
-		s.Description = description
+		s.Description = sql.NullString{String: description, Valid: true}
 	}
 	if category != "" {
 		s.Category = category
