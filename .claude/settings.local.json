@@ -7,7 +7,8 @@
       "Bash(where psql:*)",
       "Bash(\"C:\\Program Files\\PostgreSQL\\15\\bin\\psql.exe\" -U unlimited -d unlimited_corp -c \"\\dt\")",
       "Bash(go run:*)",
-      "Bash(\"C:\\Go\\bin\\go.exe\" run:*)"
+      "Bash(\"C:\\Go\\bin\\go.exe\" run:*)",
+      "Bash(\"C:\\Go\\bin\\go.exe\" build:*)"
     ],
     "deny": [],
     "ask": []

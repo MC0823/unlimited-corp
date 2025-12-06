@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	companyApp "unlimited-corp/internal/application/company"
 	employeeApp "unlimited-corp/internal/application/employee"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
 	userApp "unlimited-corp/internal/application/user"
@@ -13,14 +14,16 @@ import (
 type Server struct {
 	engine           *gin.Engine
 	userService      *userApp.Service
+	companyService   *companyApp.Service
 	skillCardService *skillcardApp.Service
 	employeeService  *employeeApp.Service
 }
 
 // NewServer 创建HTTP服务器
-func NewServer(userService *userApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service) *Server {
+func NewServer(userService *userApp.Service, companyService *companyApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service) *Server {
 	return &Server{
 		userService:      userService,
+		companyService:   companyService,
 		skillCardService: skillCardService,
 		employeeService:  employeeService,
 	}
@@ -50,6 +53,10 @@ func (s *Server) Setup(mode string) *gin.Engine {
 	// 认证相关
 	authHandler := api.NewAuthHandler(s.userService)
 	authHandler.RegisterRoutes(apiV1)
+
+	// 公司相关
+	companyHandler := api.NewCompanyHandler(s.companyService)
+	companyHandler.RegisterRoutes(apiV1)
 
 	// 技能卡相关
 	skillCardHandler := api.NewSkillCardHandler(s.skillCardService)
