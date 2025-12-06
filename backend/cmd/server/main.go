@@ -12,6 +12,7 @@ import (
 	companyApp "unlimited-corp/internal/application/company"
 	employeeApp "unlimited-corp/internal/application/employee"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
+	taskApp "unlimited-corp/internal/application/task"
 	userApp "unlimited-corp/internal/application/user"
 	"unlimited-corp/internal/infrastructure/cache"
 	"unlimited-corp/internal/infrastructure/config"
@@ -69,15 +70,17 @@ func main() {
 	companyRepo := persistence.NewCompanyRepository(db.DB)
 	skillCardRepo := persistence.NewSkillCardRepository(db)
 	employeeRepo := persistence.NewEmployeeRepository(db)
+	taskRepo := persistence.NewTaskRepository(db.DB)
 
 	// 初始化服务
 	userService := userApp.NewService(userRepo, jwt.GetManager())
 	companyService := companyApp.NewService(companyRepo)
 	skillCardService := skillcardApp.NewService(skillCardRepo)
 	employeeService := employeeApp.NewService(employeeRepo)
+	taskService := taskApp.NewService(taskRepo)
 
 	// 创建HTTP服务器
-	server := httpServer.NewServer(userService, companyService, skillCardService, employeeService)
+	server := httpServer.NewServer(userService, companyService, skillCardService, employeeService, taskService)
 	engine := server.Setup(cfg.App.Mode)
 
 	// 启动服务器

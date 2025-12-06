@@ -5,6 +5,7 @@ import (
 	companyApp "unlimited-corp/internal/application/company"
 	employeeApp "unlimited-corp/internal/application/employee"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
+	taskApp "unlimited-corp/internal/application/task"
 	userApp "unlimited-corp/internal/application/user"
 	"unlimited-corp/internal/interfaces/http/api"
 	"unlimited-corp/internal/interfaces/http/middleware"
@@ -17,15 +18,17 @@ type Server struct {
 	companyService   *companyApp.Service
 	skillCardService *skillcardApp.Service
 	employeeService  *employeeApp.Service
+	taskService      *taskApp.Service
 }
 
 // NewServer 创建HTTP服务器
-func NewServer(userService *userApp.Service, companyService *companyApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service) *Server {
+func NewServer(userService *userApp.Service, companyService *companyApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service, taskService *taskApp.Service) *Server {
 	return &Server{
 		userService:      userService,
 		companyService:   companyService,
 		skillCardService: skillCardService,
 		employeeService:  employeeService,
+		taskService:      taskService,
 	}
 }
 
@@ -65,6 +68,10 @@ func (s *Server) Setup(mode string) *gin.Engine {
 	// 员工相关
 	employeeHandler := api.NewEmployeeHandler(s.employeeService)
 	employeeHandler.RegisterRoutes(apiV1)
+
+	// 任务相关
+	taskHandler := api.NewTaskHandler(s.taskService)
+	taskHandler.RegisterRoutes(apiV1)
 
 	return s.engine
 }
