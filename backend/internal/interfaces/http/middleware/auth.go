@@ -17,6 +17,8 @@ const (
 	UserIDKey = "user_id"
 	// EmailKey 邮箱上下文键
 	EmailKey = "email"
+	// CompanyIDKey 公司ID上下文键
+	CompanyIDKey = "company_id"
 )
 
 // AuthRequired 认证中间件

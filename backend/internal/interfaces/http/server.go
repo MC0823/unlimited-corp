@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	skillcardApp "unlimited-corp/internal/application/skillcard"
 	userApp "unlimited-corp/internal/application/user"
 	"unlimited-corp/internal/interfaces/http/api"
 	"unlimited-corp/internal/interfaces/http/middleware"
@@ -9,14 +10,16 @@ import (
 
 // Server HTTP服务器
 type Server struct {
-	engine      *gin.Engine
-	userService *userApp.Service
+	engine           *gin.Engine
+	userService      *userApp.Service
+	skillCardService *skillcardApp.Service
 }
 
 // NewServer 创建HTTP服务器
-func NewServer(userService *userApp.Service) *Server {
+func NewServer(userService *userApp.Service, skillCardService *skillcardApp.Service) *Server {
 	return &Server{
-		userService: userService,
+		userService:      userService,
+		skillCardService: skillCardService,
 	}
 }
 
@@ -44,6 +47,10 @@ func (s *Server) Setup(mode string) *gin.Engine {
 	// 认证相关
 	authHandler := api.NewAuthHandler(s.userService)
 	authHandler.RegisterRoutes(apiV1)
+
+	// 技能卡相关
+	skillCardHandler := api.NewSkillCardHandler(s.skillCardService)
+	skillCardHandler.RegisterRoutes(apiV1)
 
 	return s.engine
 }
