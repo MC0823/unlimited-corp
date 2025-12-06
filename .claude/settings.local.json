@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(psql:*)",
+      "Bash(where psql:*)",
+      "Bash(\"C:\\Program Files\\PostgreSQL\\15\\bin\\psql.exe\" -U unlimited -d unlimited_corp -c \"\\dt\")",
+      "Bash(go run:*)",
+      "Bash(\"C:\\Go\\bin\\go.exe\" run:*)"
     ],
     "deny": [],
     "ask": []

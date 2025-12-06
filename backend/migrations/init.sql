@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- ========================================
 -- 2. 公司相关表
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS companies (
     UNIQUE(user_id)  -- 每个用户只能有一个公司
 );
 
-CREATE INDEX idx_companies_user_id ON companies(user_id);
+CREATE INDEX IF NOT EXISTS idx_companies_user_id ON companies(user_id);
 
 -- ========================================
 -- 3. 技能卡相关表
@@ -73,9 +73,9 @@ CREATE TABLE IF NOT EXISTS skill_cards (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_skill_cards_company_id ON skill_cards(company_id);
-CREATE INDEX idx_skill_cards_category ON skill_cards(category);
-CREATE INDEX idx_skill_cards_is_system ON skill_cards(is_system);
+CREATE INDEX IF NOT EXISTS idx_skill_cards_company_id ON skill_cards(company_id);
+CREATE INDEX IF NOT EXISTS idx_skill_cards_category ON skill_cards(category);
+CREATE INDEX IF NOT EXISTS idx_skill_cards_is_system ON skill_cards(is_system);
 
 -- ========================================
 -- 4. 员工相关表
@@ -105,8 +105,8 @@ CREATE TABLE IF NOT EXISTS employees (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_employees_company_id ON employees(company_id);
-CREATE INDEX idx_employees_status ON employees(status);
+CREATE INDEX IF NOT EXISTS idx_employees_company_id ON employees(company_id);
+CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);
 
 -- 员工-技能卡关联表
 CREATE TABLE IF NOT EXISTS employee_skills (
@@ -118,8 +118,8 @@ CREATE TABLE IF NOT EXISTS employee_skills (
     UNIQUE(employee_id, skill_card_id)
 );
 
-CREATE INDEX idx_employee_skills_employee_id ON employee_skills(employee_id);
-CREATE INDEX idx_employee_skills_skill_card_id ON employee_skills(skill_card_id);
+CREATE INDEX IF NOT EXISTS idx_employee_skills_employee_id ON employee_skills(employee_id);
+CREATE INDEX IF NOT EXISTS idx_employee_skills_skill_card_id ON employee_skills(skill_card_id);
 
 -- ========================================
 -- 5. 任务相关表
@@ -159,10 +159,10 @@ CREATE TABLE IF NOT EXISTS tasks (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_tasks_company_id ON tasks(company_id);
-CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_tasks_assigned_employee_id ON tasks(assigned_employee_id);
-CREATE INDEX idx_tasks_created_at ON tasks(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tasks_company_id ON tasks(company_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned_employee_id ON tasks(assigned_employee_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at DESC);
 
 -- 任务步骤表
 CREATE TABLE IF NOT EXISTS task_steps (
@@ -191,8 +191,8 @@ CREATE TABLE IF NOT EXISTS task_steps (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_task_steps_task_id ON task_steps(task_id);
-CREATE INDEX idx_task_steps_status ON task_steps(status);
+CREATE INDEX IF NOT EXISTS idx_task_steps_task_id ON task_steps(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_steps_status ON task_steps(status);
 
 -- ========================================
 -- 6. 对话相关表
@@ -207,7 +207,7 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_chat_sessions_company_id ON chat_sessions(company_id);
+CREATE INDEX IF NOT EXISTS idx_chat_sessions_company_id ON chat_sessions(company_id);
 
 -- 对话消息表
 CREATE TABLE IF NOT EXISTS chat_messages (
@@ -223,8 +223,8 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_chat_messages_session_id ON chat_messages(session_id);
-CREATE INDEX idx_chat_messages_created_at ON chat_messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id ON chat_messages(session_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at ON chat_messages(created_at);
 
 -- ========================================
 -- 7. 系统预置数据
@@ -267,7 +267,8 @@ INSERT INTO skill_cards (id, name, description, category, kernel_type, kernel_co
     '{"type": "object", "properties": {"chart_url": {"type": "string"}, "chart_data": {"type": "object"}}}',
     true,
     true
-);
+)
+ON CONFLICT (id) DO NOTHING;
 
 -- ========================================
 -- 8. 更新时间触发器
@@ -282,12 +283,25 @@ END;
 $$ language 'plpgsql';
 
 -- 为所有需要的表添加触发器
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_companies_updated_at ON companies;
 CREATE TRIGGER update_companies_updated_at BEFORE UPDATE ON companies FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_skill_cards_updated_at ON skill_cards;
 CREATE TRIGGER update_skill_cards_updated_at BEFORE UPDATE ON skill_cards FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_employees_updated_at ON employees;
 CREATE TRIGGER update_employees_updated_at BEFORE UPDATE ON employees FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks;
 CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_task_steps_updated_at ON task_steps;
 CREATE TRIGGER update_task_steps_updated_at BEFORE UPDATE ON task_steps FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_chat_sessions_updated_at ON chat_sessions;
 CREATE TRIGGER update_chat_sessions_updated_at BEFORE UPDATE ON chat_sessions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- 完成
