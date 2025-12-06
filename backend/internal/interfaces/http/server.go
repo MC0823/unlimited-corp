@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	chatApp "unlimited-corp/internal/application/chat"
 	companyApp "unlimited-corp/internal/application/company"
 	employeeApp "unlimited-corp/internal/application/employee"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
@@ -19,16 +20,18 @@ type Server struct {
 	skillCardService *skillcardApp.Service
 	employeeService  *employeeApp.Service
 	taskService      *taskApp.Service
+	chatService      *chatApp.Service
 }
 
 // NewServer 创建HTTP服务器
-func NewServer(userService *userApp.Service, companyService *companyApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service, taskService *taskApp.Service) *Server {
+func NewServer(userService *userApp.Service, companyService *companyApp.Service, skillCardService *skillcardApp.Service, employeeService *employeeApp.Service, taskService *taskApp.Service, chatService *chatApp.Service) *Server {
 	return &Server{
 		userService:      userService,
 		companyService:   companyService,
 		skillCardService: skillCardService,
 		employeeService:  employeeService,
 		taskService:      taskService,
+		chatService:      chatService,
 	}
 }
 
@@ -72,6 +75,10 @@ func (s *Server) Setup(mode string) *gin.Engine {
 	// 任务相关
 	taskHandler := api.NewTaskHandler(s.taskService)
 	taskHandler.RegisterRoutes(apiV1)
+
+	// 对话相关
+	chatHandler := api.NewChatHandler(s.chatService)
+	chatHandler.RegisterRoutes(apiV1)
 
 	return s.engine
 }

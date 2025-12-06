@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	chatApp "unlimited-corp/internal/application/chat"
 	companyApp "unlimited-corp/internal/application/company"
 	employeeApp "unlimited-corp/internal/application/employee"
 	skillcardApp "unlimited-corp/internal/application/skillcard"
@@ -71,6 +72,7 @@ func main() {
 	skillCardRepo := persistence.NewSkillCardRepository(db)
 	employeeRepo := persistence.NewEmployeeRepository(db)
 	taskRepo := persistence.NewTaskRepository(db.DB)
+	chatRepo := persistence.NewChatRepository(db.DB)
 
 	// 初始化服务
 	userService := userApp.NewService(userRepo, jwt.GetManager())
@@ -78,9 +80,10 @@ func main() {
 	skillCardService := skillcardApp.NewService(skillCardRepo)
 	employeeService := employeeApp.NewService(employeeRepo)
 	taskService := taskApp.NewService(taskRepo)
+	chatService := chatApp.NewService(chatRepo, chatRepo)
 
 	// 创建HTTP服务器
-	server := httpServer.NewServer(userService, companyService, skillCardService, employeeService, taskService)
+	server := httpServer.NewServer(userService, companyService, skillCardService, employeeService, taskService, chatService)
 	engine := server.Setup(cfg.App.Mode)
 
 	// 启动服务器
