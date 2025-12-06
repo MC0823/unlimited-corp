@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage'
 import CompanyPage from './pages/CompanyPage'
 import EmployeePage from './pages/EmployeePage'
 import SkillCardPage from './pages/SkillCardPage'
+import OfficePage from './pages/OfficePage'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -21,9 +22,15 @@ function App() {
           isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />
         } />
         
+        {/* 演示路由 - 无需登录直接访问办公室 */}
+        <Route path="/demo" element={<OfficePage />} />
+        
         {/* 受保护路由 */}
         <Route path="/" element={
-          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          isAuthenticated ? <Navigate to="/office" replace /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/office" element={
+          isAuthenticated ? <OfficePage /> : <Navigate to="/login" replace />
         } />
         <Route path="/dashboard" element={
           isAuthenticated ? <DashboardPage /> : <Navigate to="/login" replace />
