@@ -3,6 +3,7 @@ export * from './task'
 export * from './company'
 export * from './chat'
 export * from './skillcard'
+export * from './websocket'
 export type { Employee, EmployeeStatus } from './employee'
 
 // API响应格式
