@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ClipboardList, Users, BarChart3, ShoppingBag, Command } from 'lucide-react';
+import { ClipboardList, BarChart3, ShoppingBag, Command } from 'lucide-react';
 import { Task, Secretary, ModalType } from '../../types/office';
 
 interface BottomButtonBarProps {
@@ -17,13 +17,6 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
       label: '任务中心',
       color: '#FFD93D',
       badge: tasks.filter(t => t.status === 'in-progress').length,
-    },
-    {
-      id: 'secretary',
-      icon: Users,
-      label: '秘书处',
-      color: '#FF6B9D',
-      badge: secretaries.length,
     },
     {
       id: 'command',
@@ -56,23 +49,11 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
 
   return (
     <motion.div
-      className="relative z-20 bg-gradient-to-t from-[#1a2332] to-[#1a2332]/95 backdrop-blur-md border-t-2 border-[#3D7FFF]/30"
+      className="relative z-20 bg-gradient-to-t from-[#1a2332] to-transparent backdrop-blur-md"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, delay: 0.2 }}
     >
-      {/* 顶部装饰线 */}
-      <motion.div
-        className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3D7FFF] to-transparent"
-        animate={{
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-        }}
-      />
-
       <div className="px-8 py-6">
         <div className="flex items-center justify-center gap-8">
           {buttons.map((button, index) => {
@@ -89,7 +70,7 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                   type: 'spring',
                   stiffness: 200,
                 }}
-                className="relative"
+                className="relative flex flex-col items-center"
               >
                 {/* 按钮主体 */}
                 <motion.button
@@ -106,17 +87,17 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                     }}
                   />
 
-                  {/* 中央按钮特殊效果 - 多层脉冲波纹 */}
+                  {/* 中央按钮特殊效果 - 多层脉冲波纹 (仅hover时显示) */}
                   {isCenter && (
                     <>
                       {/* 第一层脉冲 */}
                       <motion.div
-                        className="absolute inset-[-20px] rounded-full"
+                        className="absolute inset-[-12px] rounded-full opacity-0 group-hover:opacity-100"
                         style={{
                           border: `2px solid ${button.color}`,
                         }}
                         animate={{
-                          scale: [1, 1.5, 2],
+                          scale: [1, 1.4, 1.8],
                           opacity: [0.6, 0.3, 0],
                         }}
                         transition={{
@@ -127,12 +108,12 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                       />
                       {/* 第二层脉冲 */}
                       <motion.div
-                        className="absolute inset-[-20px] rounded-full"
+                        className="absolute inset-[-12px] rounded-full opacity-0 group-hover:opacity-100"
                         style={{
                           border: `2px solid ${button.color}`,
                         }}
                         animate={{
-                          scale: [1, 1.5, 2],
+                          scale: [1, 1.4, 1.8],
                           opacity: [0.6, 0.3, 0],
                         }}
                         transition={{
@@ -142,32 +123,14 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                           delay: 0.5,
                         }}
                       />
-                      {/* 第三层脉冲 */}
+                      {/* 呼吸光环 - 仅hover时显示 */}
                       <motion.div
-                        className="absolute inset-[-20px] rounded-full"
-                        style={{
-                          border: `2px solid ${button.color}`,
-                        }}
-                        animate={{
-                          scale: [1, 1.5, 2],
-                          opacity: [0.6, 0.3, 0],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: 'easeOut',
-                          delay: 1,
-                        }}
-                      />
-                      {/* 呼吸光环 */}
-                      <motion.div
-                        className="absolute inset-[-8px] rounded-full"
+                        className="absolute inset-[-6px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         style={{
                           background: `radial-gradient(circle, ${button.color}44 0%, transparent 70%)`,
                         }}
                         animate={{
-                          scale: [1, 1.15, 1],
-                          opacity: [0.5, 0.8, 0.5],
+                          scale: [1, 1.1, 1],
                         }}
                         transition={{
                           duration: 1.5,
@@ -181,7 +144,7 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                   {/* 按钮圆形 */}
                   <div
                     className={`relative rounded-full shadow-2xl overflow-hidden ${
-                      isCenter ? 'w-28 h-28 border-4' : 'w-20 h-20 border-[3px]'
+                      isCenter ? 'w-20 h-20 border-[3px]' : 'w-16 h-16 border-[3px]'
                     }`}
                     style={{
                       background: isCenter 
@@ -204,19 +167,19 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                         } : {}}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       >
-                        <Icon className={`text-white drop-shadow-lg ${isCenter ? 'w-12 h-12' : 'w-8 h-8'}`} />
+                        <Icon className={`text-white drop-shadow-lg ${isCenter ? 'w-9 h-9' : 'w-7 h-7'}`} />
                       </motion.div>
                     </div>
 
                     {/* 中央按钮语音波形动画 */}
                     {isCenter && (
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-end gap-[2px]">
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-end gap-[2px]">
                         {[...Array(5)].map((_, i) => (
                           <motion.div
                             key={i}
-                            className="w-1 bg-white/60 rounded-full"
+                            className="w-0.5 bg-white/60 rounded-full"
                             animate={{
-                              height: [4, 8 + Math.random() * 8, 4],
+                              height: [3, 6 + Math.random() * 6, 3],
                             }}
                             transition={{
                               duration: 0.5,
@@ -269,16 +232,16 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
 
                   {/* 底部装饰圈 */}
                   <motion.div
-                    className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full"
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full"
                     style={{
-                      width: isCenter ? '100px' : '70px',
-                      height: isCenter ? '16px' : '10px',
-                      background: `radial-gradient(ellipse, ${button.color}${isCenter ? 'aa' : '66'}, transparent)`,
-                      filter: `blur(${isCenter ? '10px' : '6px'})`,
+                      width: isCenter ? '72px' : '58px',
+                      height: isCenter ? '12px' : '8px',
+                      background: `radial-gradient(ellipse, ${button.color}${isCenter ? '88' : '55'}, transparent)`,
+                      filter: `blur(${isCenter ? '8px' : '5px'})`,
                     }}
                     animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: isCenter ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
+                      scale: [1, 1.1, 1],
+                      opacity: isCenter ? [0.5, 0.8, 0.5] : [0.3, 0.5, 0.3],
                     }}
                     transition={{
                       duration: isCenter ? 1.5 : 2,
@@ -288,15 +251,10 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                   />
                 </motion.button>
 
-                {/* 标签 */}
-                <motion.div
-                  className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                >
-                  <div className="text-xs text-white/80">{button.label}</div>
-                </motion.div>
+                {/* 标签 - 统一对齐 */}
+                <div className="mt-3 text-center">
+                  <span className="text-xs text-white/80">{button.label}</span>
+                </div>
 
                 {/* 连接线装饰 */}
                 {!isCenter && (

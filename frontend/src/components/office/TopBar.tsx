@@ -27,7 +27,7 @@ export function TopBar() {
 
   return (
     <motion.div
-      className="relative z-20 bg-gradient-to-b from-[#1a2332] to-[#1a2332]/95 backdrop-blur-md border-b-2 border-[#3D7FFF]/30"
+      className="relative z-20 bg-gradient-to-b from-[#1a2332] to-transparent backdrop-blur-md"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}
@@ -111,17 +111,6 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* 底部装饰线 */}
-      <motion.div
-        className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3D7FFF] to-transparent"
-        animate={{
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-        }}
-      />
     </motion.div>
   );
 }
