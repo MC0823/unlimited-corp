@@ -18,7 +18,7 @@ func NewService(repo company.Repository) *Service {
 }
 
 type CreateInput struct {
-	UserID      uuid.UUID `json:"user_id" binding:"required"`
+	UserID      uuid.UUID `json:"-"`
 	Name        string    `json:"name" binding:"required,min=2,max=200"`
 	Description string    `json:"description"`
 	LogoURL     string    `json:"logo_url"`
@@ -48,6 +48,14 @@ func (s *Service) GetByID(ctx context.Context, id uuid.UUID) (*company.Company, 
 
 func (s *Service) GetByUserID(ctx context.Context, userID uuid.UUID) (*company.Company, error) {
 	return s.repo.GetByUserID(ctx, userID)
+}
+
+func (s *Service) GetCompanyIDByUserID(ctx context.Context, userID uuid.UUID) (uuid.UUID, error) {
+	c, err := s.repo.GetByUserID(ctx, userID)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return c.ID, nil
 }
 
 type UpdateInput struct {

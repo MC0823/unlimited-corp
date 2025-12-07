@@ -28,3 +28,7 @@ func NewCompany(userID uuid.UUID, name, description string) *Company {
 		UpdatedAt:   time.Now(),
 	}
 }
+
+func (c *Company) GetID() uuid.UUID {
+	return c.ID
+}

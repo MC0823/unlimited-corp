@@ -4,10 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	employeeApp "unlimited-corp/internal/application/employee"
+	"unlimited-corp/internal/interfaces/http/helpers"
 	"unlimited-corp/internal/interfaces/http/middleware"
-	"unlimited-corp/pkg/errors"
 )
 
 // EmployeeHandler handles employee related HTTP requests
@@ -21,9 +20,10 @@ func NewEmployeeHandler(employeeService *employeeApp.Service) *EmployeeHandler {
 }
 
 // RegisterRoutes registers employee routes
-func (h *EmployeeHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *EmployeeHandler) RegisterRoutes(r *gin.RouterGroup, companyMiddleware gin.HandlerFunc) {
 	employees := r.Group("/employees")
 	employees.Use(middleware.AuthRequired())
+	employees.Use(companyMiddleware)
 	{
 		employees.POST("", h.Create)
 		employees.GET("", h.List)
@@ -40,29 +40,22 @@ func (h *EmployeeHandler) RegisterRoutes(r *gin.RouterGroup) {
 
 // Create creates a new employee
 func (h *EmployeeHandler) Create(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
 	var input employeeApp.CreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid request: " + err.Error(),
-		})
+		helpers.RespondError(c, http.StatusBadRequest, "invalid request: "+err.Error())
 		return
 	}
 
-	input.CompanyID = companyID.(uuid.UUID)
+	input.CompanyID = companyID
 
 	emp, err := h.employeeService.Create(c.Request.Context(), &input)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -75,18 +68,14 @@ func (h *EmployeeHandler) Create(c *gin.Context) {
 
 // List retrieves all employees for the current company
 func (h *EmployeeHandler) List(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	employees, err := h.employeeService.List(c.Request.Context(), companyID.(uuid.UUID))
+	employees, err := h.employeeService.List(c.Request.Context(), companyID)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -99,18 +88,14 @@ func (h *EmployeeHandler) List(c *gin.Context) {
 
 // ListAvailable retrieves all available employees
 func (h *EmployeeHandler) ListAvailable(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	employees, err := h.employeeService.ListAvailable(c.Request.Context(), companyID.(uuid.UUID))
+	employees, err := h.employeeService.ListAvailable(c.Request.Context(), companyID)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -123,19 +108,14 @@ func (h *EmployeeHandler) ListAvailable(c *gin.Context) {
 
 // GetByID retrieves an employee by ID
 func (h *EmployeeHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	id, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
 	emp, err := h.employeeService.GetByID(c.Request.Context(), id)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -148,40 +128,28 @@ func (h *EmployeeHandler) GetByID(c *gin.Context) {
 
 // Update updates an employee
 func (h *EmployeeHandler) Update(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	idStr := c.Param("id")
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	id, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
 	var input employeeApp.UpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid request: " + err.Error(),
-		})
+		helpers.RespondError(c, http.StatusBadRequest, "invalid request: "+err.Error())
 		return
 	}
 
 	input.ID = id
-	input.CompanyID = companyID.(uuid.UUID)
+	input.CompanyID = companyID
 
 	emp, err := h.employeeService.Update(c.Request.Context(), &input)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -194,27 +162,18 @@ func (h *EmployeeHandler) Update(c *gin.Context) {
 
 // Delete deletes an employee
 func (h *EmployeeHandler) Delete(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	idStr := c.Param("id")
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	id, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
-	if err := h.employeeService.Delete(c.Request.Context(), id, companyID.(uuid.UUID)); err != nil {
-		handleEmployeeError(c, err)
+	if err := h.employeeService.Delete(c.Request.Context(), id, companyID); err != nil {
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -226,39 +185,27 @@ func (h *EmployeeHandler) Delete(c *gin.Context) {
 
 // AssignSkill assigns a skill to an employee
 func (h *EmployeeHandler) AssignSkill(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	idStr := c.Param("id")
-	employeeID, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	employeeID, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
 	var input employeeApp.AssignSkillInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid request: " + err.Error(),
-		})
+		helpers.RespondError(c, http.StatusBadRequest, "invalid request: "+err.Error())
 		return
 	}
 
 	input.EmployeeID = employeeID
-	input.CompanyID = companyID.(uuid.UUID)
+	input.CompanyID = companyID
 
 	if err := h.employeeService.AssignSkill(c.Request.Context(), &input); err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -270,37 +217,23 @@ func (h *EmployeeHandler) AssignSkill(c *gin.Context) {
 
 // RemoveSkill removes a skill from an employee
 func (h *EmployeeHandler) RemoveSkill(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	idStr := c.Param("id")
-	employeeID, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	employeeID, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
-	skillIdStr := c.Param("skillId")
-	skillCardID, err := uuid.Parse(skillIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid skill card id",
-		})
+	skillCardID, ok := helpers.ParseUUID(c, "skillId")
+	if !ok {
 		return
 	}
 
-	if err := h.employeeService.RemoveSkill(c.Request.Context(), employeeID, skillCardID, companyID.(uuid.UUID)); err != nil {
-		handleEmployeeError(c, err)
+	if err := h.employeeService.RemoveSkill(c.Request.Context(), employeeID, skillCardID, companyID); err != nil {
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -312,19 +245,14 @@ func (h *EmployeeHandler) RemoveSkill(c *gin.Context) {
 
 // GetSkills retrieves all skills for an employee
 func (h *EmployeeHandler) GetSkills(c *gin.Context) {
-	idStr := c.Param("id")
-	employeeID, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	employeeID, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
 	skills, err := h.employeeService.GetSkills(c.Request.Context(), employeeID)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -342,37 +270,25 @@ type SetStatusInput struct {
 
 // SetStatus sets the status of an employee
 func (h *EmployeeHandler) SetStatus(c *gin.Context) {
-	companyID, exists := c.Get(middleware.CompanyIDKey)
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "company_id is required",
-		})
+	companyID, ok := helpers.MustGetCompanyID(c)
+	if !ok {
 		return
 	}
 
-	idStr := c.Param("id")
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid employee id",
-		})
+	id, ok := helpers.ParseUUID(c, "id")
+	if !ok {
 		return
 	}
 
 	var input SetStatusInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "invalid request: " + err.Error(),
-		})
+		helpers.RespondError(c, http.StatusBadRequest, "invalid request: "+err.Error())
 		return
 	}
 
-	emp, err := h.employeeService.SetStatus(c.Request.Context(), id, companyID.(uuid.UUID), input.Status)
+	emp, err := h.employeeService.SetStatus(c.Request.Context(), id, companyID, input.Status)
 	if err != nil {
-		handleEmployeeError(c, err)
+		helpers.HandleError(c, err)
 		return
 	}
 
@@ -380,21 +296,5 @@ func (h *EmployeeHandler) SetStatus(c *gin.Context) {
 		"code":    0,
 		"message": "success",
 		"data":    emp,
-	})
-}
-
-// handleEmployeeError handles employee errors
-func handleEmployeeError(c *gin.Context, err error) {
-	if appErr, ok := err.(*errors.AppError); ok {
-		c.JSON(appErr.Code, gin.H{
-			"code":    appErr.Code,
-			"message": appErr.Message,
-		})
-		return
-	}
-
-	c.JSON(http.StatusInternalServerError, gin.H{
-		"code":    500,
-		"message": "internal server error",
 	})
 }

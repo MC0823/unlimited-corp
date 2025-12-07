@@ -1,19 +1,22 @@
-import { Typography, Row, Col, Card, Statistic, Empty } from 'antd'
-import { 
-  TeamOutlined, 
-  ThunderboltOutlined, 
+import { Typography, Row, Col, Card, Statistic, Empty, Layout } from 'antd'
+import {
+  TeamOutlined,
+  ThunderboltOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined 
+  ClockCircleOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/stores/authStore'
+import MainLayout from '@/components/common/MainLayout'
 
 const { Title } = Typography
+const { Content } = Layout
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user)
 
   return (
-    <div className="p-6">
+    <MainLayout>
+      <Content>
       {/* 欢迎区域 */}
       <div className="mb-6">
         <Title level={3}>
@@ -86,6 +89,7 @@ export default function DashboardPage() {
           </Card>
         </Col>
       </Row>
-    </div>
+      </Content>
+    </MainLayout>
   )
 }

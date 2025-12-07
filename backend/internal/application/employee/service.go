@@ -98,11 +98,6 @@ func (s *Service) Update(ctx context.Context, input *UpdateInput) (*employee.Emp
 		return nil, errors.ErrNotFound
 	}
 
-	// Check ownership
-	if emp.CompanyID != input.CompanyID {
-		return nil, errors.New(403, "no permission to update this employee")
-	}
-
 	emp.Update(input.Name, input.Role, input.Personality, input.AvatarURL)
 
 	if err := s.repo.Update(ctx, emp); err != nil {
@@ -114,19 +109,6 @@ func (s *Service) Update(ctx context.Context, input *UpdateInput) (*employee.Emp
 
 // Delete deletes an employee
 func (s *Service) Delete(ctx context.Context, id, companyID uuid.UUID) error {
-	emp, err := s.repo.GetByID(ctx, id)
-	if err != nil {
-		return errors.Wrap(err, "failed to get employee")
-	}
-	if emp == nil {
-		return errors.ErrNotFound
-	}
-
-	// Check ownership
-	if emp.CompanyID != companyID {
-		return errors.New(403, "no permission to delete this employee")
-	}
-
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return errors.Wrap(err, "failed to delete employee")
 	}
@@ -144,19 +126,6 @@ type AssignSkillInput struct {
 
 // AssignSkill assigns a skill card to an employee
 func (s *Service) AssignSkill(ctx context.Context, input *AssignSkillInput) error {
-	emp, err := s.repo.GetByID(ctx, input.EmployeeID)
-	if err != nil {
-		return errors.Wrap(err, "failed to get employee")
-	}
-	if emp == nil {
-		return errors.ErrNotFound
-	}
-
-	// Check ownership
-	if emp.CompanyID != input.CompanyID {
-		return errors.New(403, "no permission to assign skill")
-	}
-
 	proficiency := input.Proficiency
 	if proficiency <= 0 || proficiency > 1 {
 		proficiency = 1.0
@@ -171,19 +140,6 @@ func (s *Service) AssignSkill(ctx context.Context, input *AssignSkillInput) erro
 
 // RemoveSkill removes a skill card from an employee
 func (s *Service) RemoveSkill(ctx context.Context, employeeID, skillCardID, companyID uuid.UUID) error {
-	emp, err := s.repo.GetByID(ctx, employeeID)
-	if err != nil {
-		return errors.Wrap(err, "failed to get employee")
-	}
-	if emp == nil {
-		return errors.ErrNotFound
-	}
-
-	// Check ownership
-	if emp.CompanyID != companyID {
-		return errors.New(403, "no permission to remove skill")
-	}
-
 	if err := s.repo.RemoveSkill(ctx, employeeID, skillCardID); err != nil {
 		return errors.Wrap(err, "failed to remove skill")
 	}
@@ -213,11 +169,6 @@ func (s *Service) SetStatus(ctx context.Context, id, companyID uuid.UUID, status
 	}
 	if emp == nil {
 		return nil, errors.ErrNotFound
-	}
-
-	// Check ownership
-	if emp.CompanyID != companyID {
-		return nil, errors.New(403, "no permission to update employee status")
 	}
 
 	emp.SetStatus(employee.Status(status))

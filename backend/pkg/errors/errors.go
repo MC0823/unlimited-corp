@@ -69,3 +69,23 @@ func Is(err, target error) bool {
 	}
 	return false
 }
+
+// IsNotFound 检查是否为404错误
+func IsNotFound(err error) bool {
+	return Is(err, ErrNotFound)
+}
+
+// IsConflict 检查是否为409错误
+func IsConflict(err error) bool {
+	return Is(err, ErrConflict)
+}
+
+// IsUnauthorized 检查是否为403错误
+func IsUnauthorized(err error) bool {
+	return Is(err, ErrForbidden)
+}
+
+// IsBadRequest 检查是否为400错误
+func IsBadRequest(err error) bool {
+	return Is(err, ErrInvalidRequest)
+}

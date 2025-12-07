@@ -3,12 +3,12 @@ package persistence
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"unlimited-corp/internal/domain/employee"
 	"unlimited-corp/internal/infrastructure/database"
+	"unlimited-corp/pkg/errors"
 )
 
 // EmployeeRepository implements the employee.Repository interface
@@ -37,7 +37,7 @@ func (r *EmployeeRepository) Create(ctx context.Context, e *employee.Employee) e
 		e.CreatedAt, e.UpdatedAt,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create employee: %w", err)
+		return errors.Wrap(err, "failed to create employee")
 	}
 
 	return nil
@@ -50,9 +50,9 @@ func (r *EmployeeRepository) GetByID(ctx context.Context, id uuid.UUID) (*employ
 	var e employee.Employee
 	if err := r.db.GetContext(ctx, &e, query, id); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, errors.ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get employee: %w", err)
+		return nil, errors.Wrap(err, "failed to get employee")
 	}
 
 	return &e, nil
@@ -64,7 +64,7 @@ func (r *EmployeeRepository) GetByCompanyID(ctx context.Context, companyID uuid.
 
 	var employees []*employee.Employee
 	if err := r.db.SelectContext(ctx, &employees, query, companyID); err != nil {
-		return nil, fmt.Errorf("failed to get employees by company: %w", err)
+		return nil, errors.Wrap(err, "failed to get employees by company")
 	}
 
 	return employees, nil
@@ -76,7 +76,7 @@ func (r *EmployeeRepository) GetAvailable(ctx context.Context, companyID uuid.UU
 
 	var employees []*employee.Employee
 	if err := r.db.SelectContext(ctx, &employees, query, companyID); err != nil {
-		return nil, fmt.Errorf("failed to get available employees: %w", err)
+		return nil, errors.Wrap(err, "failed to get available employees")
 	}
 
 	return employees, nil
@@ -98,16 +98,16 @@ func (r *EmployeeRepository) Update(ctx context.Context, e *employee.Employee) e
 		e.Settings, time.Now(), e.ID,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update employee: %w", err)
+		return errors.Wrap(err, "failed to update employee")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return errors.Wrap(err, "failed to get rows affected")
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("employee not found")
+		return errors.ErrNotFound
 	}
 
 	return nil
@@ -119,16 +119,16 @@ func (r *EmployeeRepository) Delete(ctx context.Context, id uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete employee: %w", err)
+		return errors.Wrap(err, "failed to delete employee")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return errors.Wrap(err, "failed to get rows affected")
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("employee not found")
+		return errors.ErrNotFound
 	}
 
 	return nil
@@ -146,7 +146,7 @@ func (r *EmployeeRepository) AssignSkill(ctx context.Context, employeeID, skillC
 		uuid.New(), employeeID, skillCardID, proficiency, time.Now(),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to assign skill: %w", err)
+		return errors.Wrap(err, "failed to assign skill")
 	}
 
 	return nil
@@ -158,7 +158,7 @@ func (r *EmployeeRepository) RemoveSkill(ctx context.Context, employeeID, skillC
 
 	_, err := r.db.ExecContext(ctx, query, employeeID, skillCardID)
 	if err != nil {
-		return fmt.Errorf("failed to remove skill: %w", err)
+		return errors.Wrap(err, "failed to remove skill")
 	}
 
 	return nil
@@ -170,7 +170,7 @@ func (r *EmployeeRepository) GetSkills(ctx context.Context, employeeID uuid.UUID
 
 	var skills []*employee.EmployeeSkill
 	if err := r.db.SelectContext(ctx, &skills, query, employeeID); err != nil {
-		return nil, fmt.Errorf("failed to get employee skills: %w", err)
+		return nil, errors.Wrap(err, "failed to get employee skills")
 	}
 
 	return skills, nil
@@ -182,7 +182,7 @@ func (r *EmployeeRepository) GetByStatus(ctx context.Context, companyID uuid.UUI
 
 	var employees []*employee.Employee
 	if err := r.db.SelectContext(ctx, &employees, query, companyID, status); err != nil {
-		return nil, fmt.Errorf("failed to get employees by status: %w", err)
+		return nil, errors.Wrap(err, "failed to get employees by status")
 	}
 
 	return employees, nil
@@ -194,7 +194,7 @@ func (r *EmployeeRepository) CountByCompany(ctx context.Context, companyID uuid.
 
 	var count int
 	if err := r.db.GetContext(ctx, &count, query, companyID); err != nil {
-		return 0, fmt.Errorf("failed to count employees: %w", err)
+		return 0, errors.Wrap(err, "failed to count employees")
 	}
 
 	return count, nil

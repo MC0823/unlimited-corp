@@ -64,13 +64,16 @@ func (s *Server) Setup(mode string) *gin.Engine {
 	companyHandler := api.NewCompanyHandler(s.companyService)
 	companyHandler.RegisterRoutes(apiV1)
 
+	// 公司中间件
+	companyMiddleware := middleware.CompanyRequired(s.companyService)
+
 	// 技能卡相关
 	skillCardHandler := api.NewSkillCardHandler(s.skillCardService)
-	skillCardHandler.RegisterRoutes(apiV1)
+	skillCardHandler.RegisterRoutes(apiV1, companyMiddleware)
 
 	// 员工相关
 	employeeHandler := api.NewEmployeeHandler(s.employeeService)
-	employeeHandler.RegisterRoutes(apiV1)
+	employeeHandler.RegisterRoutes(apiV1, companyMiddleware)
 
 	// 任务相关
 	taskHandler := api.NewTaskHandler(s.taskService)
