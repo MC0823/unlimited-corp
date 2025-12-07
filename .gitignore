@@ -36,5 +36,11 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Installation packages
+*.zip
+*.tar.gz
+*.msi
+go*.zip
+
 # Qoder
 .qoder/
