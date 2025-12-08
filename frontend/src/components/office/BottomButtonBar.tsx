@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { ClipboardList, BarChart3, ShoppingBag, Command } from 'lucide-react';
+import { Building2, Users, Sparkles, ShoppingBag, Command } from 'lucide-react';
+import { useState } from 'react';
 import { Task, Secretary, ModalType } from '../../types/office';
 
 interface BottomButtonBarProps {
@@ -7,16 +8,23 @@ interface BottomButtonBarProps {
   tasks: Task[];
   secretaries: Secretary[];
   onModalOpen: (modal: Exclude<ModalType, null>) => void;
+  onDepartmentClick?: () => void;
 }
 
-export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpen }: BottomButtonBarProps) {
+export function BottomButtonBar({ onCommandClick, tasks: _tasks, secretaries: _secretaries, onModalOpen, onDepartmentClick }: BottomButtonBarProps) {
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const buttons = [
     {
-      id: 'tasks',
-      icon: ClipboardList,
-      label: '任务中心',
+      id: 'department',
+      icon: Building2,
+      label: '部门',
       color: '#FFD93D',
-      badge: tasks.filter(t => t.status === 'in-progress').length,
+    },
+    {
+      id: 'employee',
+      icon: Users,
+      label: '员工',
+      color: '#FF6B9D',
     },
     {
       id: 'command',
@@ -26,9 +34,9 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
       isCenter: true,
     },
     {
-      id: 'data',
-      icon: BarChart3,
-      label: '数据中心',
+      id: 'skill',
+      icon: Sparkles,
+      label: '技能',
       color: '#4ECDC4',
     },
     {
@@ -42,6 +50,8 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
   const handleButtonClick = (buttonId: string) => {
     if (buttonId === 'command') {
       onCommandClick();
+    } else if (buttonId === 'department' && onDepartmentClick) {
+      onDepartmentClick();
     } else {
       onModalOpen(buttonId as Exclude<ModalType, null>);
     }
@@ -77,6 +87,8 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                   onClick={() => handleButtonClick(button.id)}
                   whileHover={{ scale: 1.1, y: -8 }}
                   whileTap={{ scale: 0.95 }}
+                  onMouseEnter={() => setHoveredButton(button.id)}
+                  onMouseLeave={() => setHoveredButton(null)}
                   className="relative group office-btn"
                 >
                   {/* 外圈发光效果 */}
@@ -87,55 +99,111 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                     }}
                   />
 
-                  {/* 中央按钮特殊效果 - 多层脉冲波纹 (仅hover时显示) */}
-                  {isCenter && (
+                  {/* 中央按钮特殊效果 - 圆形脉冲波纹 (鼠标悬停显示/移开渐隐) */}
+                  {isCenter && hoveredButton === button.id && (
                     <>
-                      {/* 第一层脉冲 */}
+                      {/* 第一层圆形脉冲 - 使用key强制重新挂载避免闪现 */}
                       <motion.div
-                        className="absolute inset-[-12px] rounded-full opacity-0 group-hover:opacity-100"
+                        key="pulse-1"
+                        className="absolute rounded-full pointer-events-none"
                         style={{
+                          width: '80px',
+                          height: '80px',
+                          top: '50%',
+                          left: '50%',
+                          marginTop: '-40px',
+                          marginLeft: '-40px',
                           border: `2px solid ${button.color}`,
                         }}
+                        initial={{ opacity: 0.6, scale: 1 }}
                         animate={{
-                          scale: [1, 1.4, 1.8],
                           opacity: [0.6, 0.3, 0],
+                          scale: [1, 1.8, 2.5],
                         }}
                         transition={{
-                          duration: 2,
+                          duration: 2.5,
+                          times: [0, 0.5, 1],
                           repeat: Infinity,
                           ease: 'easeOut',
                         }}
                       />
-                      {/* 第二层脉冲 */}
+                      {/* 第二层圆形脉冲 */}
                       <motion.div
-                        className="absolute inset-[-12px] rounded-full opacity-0 group-hover:opacity-100"
+                        key="pulse-2"
+                        className="absolute rounded-full pointer-events-none"
                         style={{
+                          width: '80px',
+                          height: '80px',
+                          top: '50%',
+                          left: '50%',
+                          marginTop: '-40px',
+                          marginLeft: '-40px',
                           border: `2px solid ${button.color}`,
                         }}
+                        initial={{ opacity: 0.6, scale: 1 }}
                         animate={{
-                          scale: [1, 1.4, 1.8],
                           opacity: [0.6, 0.3, 0],
+                          scale: [1, 1.8, 2.5],
                         }}
                         transition={{
-                          duration: 2,
+                          duration: 2.5,
+                          times: [0, 0.5, 1],
                           repeat: Infinity,
                           ease: 'easeOut',
-                          delay: 0.5,
+                          delay: 0.4,
                         }}
                       />
-                      {/* 呼吸光环 - 仅hover时显示 */}
+                      {/* 第三层圆形脉冲 */}
                       <motion.div
-                        className="absolute inset-[-6px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        key="pulse-3"
+                        className="absolute rounded-full pointer-events-none"
                         style={{
+                          width: '80px',
+                          height: '80px',
+                          top: '50%',
+                          left: '50%',
+                          marginTop: '-40px',
+                          marginLeft: '-40px',
+                          border: `2px solid ${button.color}`,
+                        }}
+                        initial={{ opacity: 0.6, scale: 1 }}
+                        animate={{
+                          opacity: [0.6, 0.3, 0],
+                          scale: [1, 1.8, 2.5],
+                        }}
+                        transition={{
+                          duration: 2.5,
+                          times: [0, 0.5, 1],
+                          repeat: Infinity,
+                          ease: 'easeOut',
+                          delay: 0.8,
+                        }}
+                      />
+                      {/* 圆形呼吸光环 */}
+                      <motion.div
+                        key="glow"
+                        className="absolute rounded-full pointer-events-none"
+                        style={{
+                          width: '80px',
+                          height: '80px',
+                          top: '50%',
+                          left: '50%',
+                          marginTop: '-40px',
+                          marginLeft: '-40px',
                           background: `radial-gradient(circle, ${button.color}44 0%, transparent 70%)`,
                         }}
+                        initial={{ opacity: 0 }}
                         animate={{
-                          scale: [1, 1.1, 1],
+                          opacity: 0.8,
+                          scale: [1, 1.15, 1],
                         }}
                         transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
+                          opacity: { duration: 0.3 },
+                          scale: {
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                          },
                         }}
                       />
                     </>
@@ -205,43 +273,21 @@ export function BottomButtonBar({ onCommandClick, tasks, secretaries, onModalOpe
                         }}
                       />
                     )}
-
-                    {/* 徽章 */}
-                    {button.badge && (
-                      <motion.div
-                        className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#FF6B9D] border-2 border-[#1a2332] flex items-center justify-center shadow-lg"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.5 + index * 0.1, type: 'spring' }}
-                      >
-                        <motion.span
-                          className="text-xs text-white font-medium"
-                          animate={{
-                            scale: [1, 1.2, 1],
-                          }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                          }}
-                        >
-                          {button.badge}
-                        </motion.span>
-                      </motion.div>
-                    )}
                   </div>
 
-                  {/* 底部装饰圈 */}
+                  {/* 底部圆形装饰 */}
                   <motion.div
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full"
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2"
                     style={{
-                      width: isCenter ? '72px' : '58px',
-                      height: isCenter ? '12px' : '8px',
-                      background: `radial-gradient(ellipse, ${button.color}${isCenter ? '88' : '55'}, transparent)`,
-                      filter: `blur(${isCenter ? '8px' : '5px'})`,
+                      width: isCenter ? '48px' : '40px',
+                      height: isCenter ? '48px' : '40px',
+                      borderRadius: '50%',
+                      background: `radial-gradient(circle, ${button.color}${isCenter ? '66' : '44'}, transparent 70%)`,
+                      filter: `blur(${isCenter ? '10px' : '6px'})`,
                     }}
                     animate={{
                       scale: [1, 1.1, 1],
-                      opacity: isCenter ? [0.5, 0.8, 0.5] : [0.3, 0.5, 0.3],
+                      opacity: isCenter ? [0.4, 0.7, 0.4] : [0.3, 0.5, 0.3],
                     }}
                     transition={{
                       duration: isCenter ? 1.5 : 2,

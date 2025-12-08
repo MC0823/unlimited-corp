@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/spf13/viper"
@@ -114,8 +115,52 @@ func Load(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	// 环境变量覆盖敏感配置（安全优先）
+	overrideFromEnv(&config)
+
 	globalConfig = &config
 	return &config, nil
+}
+
+// overrideFromEnv 从环境变量覆盖敏感配置
+func overrideFromEnv(config *Config) {
+	// JWT密钥 - 必须从环境变量获取生产配置
+	if secret := os.Getenv("JWT_SECRET"); secret != "" {
+		config.JWT.Secret = secret
+	}
+
+	// 数据库配置
+	if dbHost := os.Getenv("DB_HOST"); dbHost != "" {
+		config.Database.Host = dbHost
+	}
+	if dbUser := os.Getenv("DB_USER"); dbUser != "" {
+		config.Database.User = dbUser
+	}
+	if dbPassword := os.Getenv("DB_PASSWORD"); dbPassword != "" {
+		config.Database.Password = dbPassword
+	}
+	if dbName := os.Getenv("DB_NAME"); dbName != "" {
+		config.Database.Name = dbName
+	}
+
+	// Redis配置
+	if redisHost := os.Getenv("REDIS_HOST"); redisHost != "" {
+		config.Redis.Host = redisHost
+	}
+	if redisPassword := os.Getenv("REDIS_PASSWORD"); redisPassword != "" {
+		config.Redis.Password = redisPassword
+	}
+
+	// MinIO配置
+	if minioEndpoint := os.Getenv("MINIO_ENDPOINT"); minioEndpoint != "" {
+		config.MinIO.Endpoint = minioEndpoint
+	}
+	if minioAccessKey := os.Getenv("MINIO_ACCESS_KEY"); minioAccessKey != "" {
+		config.MinIO.AccessKey = minioAccessKey
+	}
+	if minioSecretKey := os.Getenv("MINIO_SECRET_KEY"); minioSecretKey != "" {
+		config.MinIO.SecretKey = minioSecretKey
+	}
 }
 
 // Get 获取全局配置

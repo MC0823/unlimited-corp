@@ -1,20 +1,20 @@
-import { useState, useRef } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { Plus, Building2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useMotionValue, animate } from 'framer-motion';
+import { message } from 'antd';
+
 import { DepartmentCard } from './DepartmentCard';
 import { DepartmentManageModal } from './DepartmentManageModal';
 import { TopBar } from './TopBar';
 import { BottomButtonBar } from './BottomButtonBar';
 import { Employee, Task, Secretary, ModalType, Department } from '../../types/office';
+import { DEFAULT_SECRETARIES, DEFAULT_TASKS } from '../../constants/officeMockData';
+import { employeeApi } from '../../api';
 
 interface OfficeProps {
   onEmployeeClick: (employee: Employee) => void;
   onCommandClick: () => void;
   onModalOpen: (modal: Exclude<ModalType, null>) => void;
 }
-
-// 生成唯一ID
-const generateId = () => Math.random().toString(36).substring(2, 9);
 
 // 水平拖拽容器组件
 interface HorizontalDragContainerProps {
@@ -30,7 +30,7 @@ function HorizontalDragContainer({
   getEmployeesByDept,
   onEmployeeClick,
   onSettingsClick,
-  onAddDepartment
+  onAddDepartment: _onAddDepartment
 }: HorizontalDragContainerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -119,76 +119,108 @@ function HorizontalDragContainer({
           />
         ))}
 
-        {/* 添加部门卡片 */}
-        <motion.div
-          className="min-w-[280px] flex-shrink-0 rounded-2xl p-8 border-2 border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-[#3D7FFF]/50 hover:bg-[#3D7FFF]/5 transition-all h-[200px]"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: departments.length * 0.1 }}
-          whileHover={{ scale: 1.02 }}
-          onClick={(e) => { e.stopPropagation(); onAddDepartment(); }}
-        >
-          <Plus className="w-10 h-10 text-white/20 mb-3" />
-          <span className="text-white/40 text-sm">添加新部门</span>
-        </motion.div>
+
       </motion.div>
     </div>
   );
 }
 
 export function Office({ onEmployeeClick, onCommandClick, onModalOpen }: OfficeProps) {
-  // 部门数据
-  const [departments, setDepartments] = useState<Department[]>([
-    { id: 'dept-1', name: '技术部', icon: '💻', color: '#3D7FFF', description: '负责产品研发与技术支持' },
-    { id: 'dept-2', name: '设计部', icon: '🎨', color: '#FF6B9D', description: '负责UI/UX设计与品牌视觉' },
-    { id: 'dept-3', name: '市场部', icon: '📢', color: '#FFD93D', description: '负责市场推广与运营' },
-    { id: 'dept-4', name: '数据部', icon: '📊', color: '#4ECDC4', description: '负责数据分析与决策支持' },
-  ]);
-
+  // 部门和员工数据 - 从API获取
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [showDeptManage, setShowDeptManage] = useState(false);
 
-  // 员工数据 - 关联部门
-  const [employees] = useState<Employee[]>([
-    { id: '1', name: 'Alice Chen', role: 'developer', status: 'working', skills: ['React', 'TypeScript'], performance: 92, currentTask: 'task-1', avatarColor: '#FF6B9D', position: { x: 25, y: 40 }, departmentId: 'dept-1' },
-    { id: '2', name: 'Bob Liu', role: 'designer', status: 'idle', skills: ['UI/UX', 'Figma'], performance: 88, avatarColor: '#4ECDC4', position: { x: 40, y: 40 }, departmentId: 'dept-2' },
-    { id: '3', name: 'Carol Wang', role: 'marketer', status: 'working', skills: ['SEO', 'Content'], performance: 85, currentTask: 'task-2', avatarColor: '#FFD93D', position: { x: 55, y: 40 }, departmentId: 'dept-3' },
-    { id: '4', name: 'David Zhang', role: 'analyst', status: 'tired', skills: ['Data', 'SQL'], performance: 90, avatarColor: '#A8E6CF', position: { x: 70, y: 40 }, departmentId: 'dept-4' },
-    { id: '5', name: 'Emma Li', role: 'developer', status: 'working', skills: ['Python', 'AI'], performance: 94, currentTask: 'task-3', avatarColor: '#C7CEEA', position: { x: 25, y: 55 }, departmentId: 'dept-1' },
-    { id: '6', name: 'Frank Wu', role: 'designer', status: 'idle', skills: ['Branding', 'Animation'], performance: 87, avatarColor: '#FFDAB9', position: { x: 40, y: 55 }, departmentId: 'dept-2' },
-  ]);
+  // 初始化加载数据
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const res = await employeeApi.listEmployees();
+      if (res.code === 0 && res.data) {
+        // 转换后端数据格式
+        const mappedEmployees = res.data.map((emp: any) => ({
+          id: emp.id,
+          name: emp.name,
+          role: emp.role || 'developer',
+          status: emp.status || 'idle',
+          skills: emp.skills || [],
+          performance: emp.performance || 80,
+          avatarColor: emp.avatar_url || '#3D7FFF',
+          position: { x: 0, y: 0 },
+          departmentId: emp.department_id || 'dept-1',
+        }));
+        setEmployees(mappedEmployees);
+        
+        // 根据员工生成部门
+        const deptMap = new Map<string, Department>();
+        mappedEmployees.forEach((emp: Employee) => {
+          if (!deptMap.has(emp.departmentId)) {
+            deptMap.set(emp.departmentId, {
+              id: emp.departmentId,
+              name: getDeptName(emp.departmentId),
+              icon: getDeptIcon(emp.departmentId),
+              color: getDeptColor(emp.departmentId),
+            });
+          }
+        });
+        if (deptMap.size === 0) {
+          deptMap.set('dept-1', { id: 'dept-1', name: '技术部', icon: '💻', color: '#3D7FFF' });
+          deptMap.set('dept-2', { id: 'dept-2', name: '设计部', icon: '🎨', color: '#FF6B9D' });
+        }
+        setDepartments(Array.from(deptMap.values()));
+      }
+    } catch (error) {
+      console.error('Failed to load employees:', error);
+      // 如果加载失败，显示默认部门
+      setDepartments([
+        { id: 'dept-1', name: '技术部', icon: '💻', color: '#3D7FFF' },
+        { id: 'dept-2', name: '设计部', icon: '🎨', color: '#FF6B9D' },
+      ]);
+    } finally {
+    }
+  };
+
+  // 部门名称、图标、颜色映射
+  const getDeptName = (id: string) => {
+    const names: Record<string, string> = { 'dept-1': '技术部', 'dept-2': '设计部', 'dept-3': '市场部', 'dept-4': '数据部' };
+    return names[id] || '未分配';
+  };
+  const getDeptIcon = (id: string) => {
+    const icons: Record<string, string> = { 'dept-1': '💻', 'dept-2': '🎨', 'dept-3': '📢', 'dept-4': '📊' };
+    return icons[id] || '💼';
+  };
+  const getDeptColor = (id: string) => {
+    const colors: Record<string, string> = { 'dept-1': '#3D7FFF', 'dept-2': '#FF6B9D', 'dept-3': '#FFB800', 'dept-4': '#4ECDC4' };
+    return colors[id] || '#3D7FFF';
+  };
 
   // 部门管理操作
   const handleAddDepartment = (dept: Omit<Department, 'id'>) => {
-    setDepartments(prev => [...prev, { ...dept, id: `dept-${generateId()}` }]);
+    const newDept = { ...dept, id: `dept-${Date.now()}` };
+    setDepartments(prev => [...prev, newDept]);
+    message.success('部门创建成功');
   };
 
   const handleUpdateDepartment = (dept: Department) => {
     setDepartments(prev => prev.map(d => d.id === dept.id ? dept : d));
+    message.success('部门更新成功');
   };
 
   const handleDeleteDepartment = (deptId: string) => {
     setDepartments(prev => prev.filter(d => d.id !== deptId));
+    message.success('部门删除成功');
   };
 
   // 按部门获取员工
   const getEmployeesByDept = (deptId: string) => 
     employees.filter(e => e.departmentId === deptId);
 
-  // 模拟任务数据
-  const [tasks] = useState<Task[]>([
-    { id: 'task-1', title: '开发新功能模块', status: 'in-progress', assignee: '1', priority: 'high', progress: 65, description: '实现用户管理系统的核心功能' },
-    { id: 'task-2', title: '市场推广方案', status: 'in-progress', assignee: '3', priority: 'medium', progress: 40, description: '制定Q4季度营销策略' },
-    { id: 'task-3', title: 'AI模型优化', status: 'in-progress', assignee: '5', priority: 'high', progress: 78, description: '提升模型准确率到95%以上' },
-    { id: 'task-4', title: '界面设计优化', status: 'pending', priority: 'low', progress: 0, description: '重新设计产品主页面' },
-    { id: 'task-5', title: '数据分析报告', status: 'completed', priority: 'medium', progress: 100, description: '生成月度运营数据报告' },
-  ]);
-
-  // 模拟秘书数据
-  const [secretaries] = useState<Secretary[]>([
-    { id: 's1', name: '商务秘书 Linda', type: 'business', avatar: '📊', status: '已准备3份报告' },
-    { id: 's2', name: '生活秘书 Sophia', type: 'life', avatar: '☕', status: '今日行程已安排' },
-    { id: 's3', name: '私人秘书 Grace', type: 'personal', avatar: '🎧', status: '待处理消息 5 条' },
-  ]);
+  // 任务和秘书数据
+  const [tasks] = useState<Task[]>(DEFAULT_TASKS);
+  const [secretaries] = useState<Secretary[]>(DEFAULT_SECRETARIES);
 
   return (
     <div className="w-full h-full relative flex flex-col overflow-hidden">
@@ -202,28 +234,10 @@ export function Office({ onEmployeeClick, onCommandClick, onModalOpen }: OfficeP
       }} />
 
       {/* 顶部状态栏 */}
-      <TopBar />
+      <TopBar onDataCenterClick={() => onModalOpen('skill')} />
 
       {/* 中央场景区域 - 部门分区 */}
       <div className="flex-1 relative overflow-hidden">
-        {/* 部门管理头部 */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-[#4ECDC4] animate-pulse" />
-            <h2 className="text-white/90 text-lg font-medium">员工工作区 Employee Workspace</h2>
-            <span className="text-white/40 text-sm">({departments.length} 个部门)</span>
-          </div>
-          <motion.button
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#3D7FFF]/20 text-[#3D7FFF] text-sm font-medium backdrop-blur-sm"
-            whileHover={{ scale: 1.05, backgroundColor: 'rgba(61, 127, 255, 0.3)' }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowDeptManage(true)}
-          >
-            <Building2 className="w-4 h-4" />
-            管理部门
-          </motion.button>
-        </div>
-
         {/* 水平拖拽容器 */}
         <HorizontalDragContainer
           departments={departments}
@@ -261,6 +275,7 @@ export function Office({ onEmployeeClick, onCommandClick, onModalOpen }: OfficeP
         tasks={tasks}
         secretaries={secretaries}
         onModalOpen={onModalOpen}
+        onDepartmentClick={() => setShowDeptManage(true)}
       />
 
       {/* 部门管理弹窗 */}

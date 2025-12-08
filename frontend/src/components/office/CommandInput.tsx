@@ -14,8 +14,8 @@ export function CommandInput({ onClose }: CommandInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      // 模拟指令处理
-      console.log('执行指令:', input);
+      // TODO: 实现指令处理逻辑
+      // console.log('执行指令:', input);
       setInput('');
       // 延迟关闭，显示执行效果
       setTimeout(onClose, 500);

@@ -3,12 +3,17 @@ package helpers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"unlimited-corp/internal/interfaces/http/middleware"
+)
+
+// Context key constants (must match middleware constants)
+const (
+	UserIDKey    = "user_id"
+	CompanyIDKey = "company_id"
 )
 
 // GetUserID 从上下文中安全获取用户ID
 func GetUserID(c *gin.Context) (uuid.UUID, bool) {
-	val, exists := c.Get(middleware.UserIDKey)
+	val, exists := c.Get(UserIDKey)
 	if !exists {
 		return uuid.Nil, false
 	}
@@ -21,7 +26,7 @@ func GetUserID(c *gin.Context) (uuid.UUID, bool) {
 
 // GetCompanyID 从上下文中安全获取公司ID
 func GetCompanyID(c *gin.Context) (uuid.UUID, bool) {
-	val, exists := c.Get(middleware.CompanyIDKey)
+	val, exists := c.Get(CompanyIDKey)
 	if !exists {
 		return uuid.Nil, false
 	}

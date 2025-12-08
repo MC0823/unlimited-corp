@@ -16,23 +16,22 @@ interface SecretaryWidgetProps {
   onSecretaryClick?: (secretary: Secretary) => void;
 }
 
-// Q版秘书形象组件
+// Q版秘书形象组件 - 纯透明背景
 function QSecretary({ type, size = 48 }: { type: string; size?: number }) {
   const getColors = () => {
     switch (type) {
       case 'business':
-        return { hair: '#4A3728', skin: '#FFDAB9', dress: '#3D7FFF', accent: '#2a5fd4' };
+        return { hair: '#4A3728', skin: '#E8C4A0', dress: '#3D7FFF', accent: '#2a5fd4' };
       case 'life':
-        return { hair: '#8B4513', skin: '#FFE4C4', dress: '#4ECDC4', accent: '#3db8b0' };
+        return { hair: '#8B4513', skin: '#DEB887', dress: '#4ECDC4', accent: '#3db8b0' };
       case 'personal':
-        return { hair: '#2C1810', skin: '#FFEFD5', dress: '#FF6B9D', accent: '#e85a87' };
+        return { hair: '#2C1810', skin: '#D2B48C', dress: '#FF6B9D', accent: '#e85a87' };
       default:
-        return { hair: '#4A3728', skin: '#FFDAB9', dress: '#3D7FFF', accent: '#2a5fd4' };
+        return { hair: '#4A3728', skin: '#E8C4A0', dress: '#3D7FFF', accent: '#2a5fd4' };
     }
   };
 
   const colors = getColors();
-  const scale = size / 48;
 
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
@@ -150,65 +149,62 @@ export function SecretaryWidget({ secretaries, onSecretaryClick }: SecretaryWidg
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
           >
-            {(() => {
-              const secretary = getSecretaryById(activeMessage.secretaryId);
-              return (
-                <div className="relative bg-[#1e2936]/95 backdrop-blur-md rounded-2xl p-3 border border-white/10 shadow-xl">
-                  {/* 关闭按钮 */}
-                  <button
-                    onClick={handleDismissMessage}
-                    className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-                  >
-                    <X className="w-3 h-3 text-white/60" />
-                  </button>
+            <div className="relative bg-[#0f1419]/95 backdrop-blur-md rounded-2xl p-3 border border-[#3D7FFF]/30 shadow-xl shadow-[#3D7FFF]/10">
+              {/* 关闭按钮 */}
+              <button
+                onClick={handleDismissMessage}
+                className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <X className="w-3 h-3 text-white/60" />
+              </button>
 
-                  {/* 消息内容 */}
-                  <div className="text-white/80 text-sm pr-6">
-                    {activeMessage.content}
-                  </div>
+              {/* 消息内容 */}
+              <div className="text-white/80 text-sm pr-6">
+                {activeMessage.content}
+              </div>
 
-                  {/* 三角箭头 */}
-                  <div 
-                    className="absolute -bottom-2 right-6 w-4 h-4 rotate-45 bg-[#1e2936]/95 border-r border-b border-white/10"
-                  />
-                </div>
-              );
-            })()}
+              {/* 三角箭头 */}
+              <div
+                className="absolute -bottom-2 right-6 w-4 h-4 rotate-45 bg-[#0f1419]/95 border-r border-b border-[#3D7FFF]/30"
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 秘书展开面板 */}
+      {/* 秘书展开面板 - 科技色背景 */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="absolute bottom-16 right-0 w-56 bg-[#1e2936]/95 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl overflow-hidden"
+            className="absolute bottom-16 right-0 w-56 bg-gradient-to-br from-[#1a2332] to-[#0f1419] backdrop-blur-md rounded-2xl border border-[#3D7FFF]/40 shadow-xl shadow-[#3D7FFF]/20 overflow-hidden"
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
           >
-            <div className="p-3 border-b border-white/10">
-              <h3 className="text-white text-sm font-medium">秘书团队</h3>
+            <div className="p-3 border-b border-[#3D7FFF]/30 bg-gradient-to-r from-[#3D7FFF]/20 to-[#4ECDC4]/10">
+              <h3 className="text-[#4ECDC4] text-sm font-medium">秘书团队</h3>
             </div>
-            <div className="p-2">
+            <div className="p-2 space-y-1">
               {secretaries.map((secretary) => {
                 const hasUnread = messages.some(m => m.secretaryId === secretary.id && !m.isRead);
                 return (
                   <motion.button
                     key={secretary.id}
-                    className="w-full p-2 rounded-xl hover:bg-white/5 transition-colors flex items-center gap-3 text-left relative"
+                    className="w-full p-2.5 rounded-xl bg-[#1a2332]/60 hover:bg-[#3D7FFF]/30 transition-colors flex items-center gap-3 text-left relative border border-transparent hover:border-[#3D7FFF]/30"
                     whileHover={{ x: 4 }}
                     onClick={() => onSecretaryClick?.(secretary)}
                   >
                     <div className="relative">
-                      <QSecretary type={secretary.type} size={36} />
+                      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#3D7FFF]/20 to-[#4ECDC4]/20 flex items-center justify-center">
+                        <QSecretary type={secretary.type} size={32} />
+                      </div>
                       {hasUnread && (
-                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#FF6B9D] rounded-full border border-[#1e2936]" />
+                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#FF6B9D] rounded-full border border-[#0f1419]" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-white text-xs font-medium truncate">{secretary.name.split(' ')[0]}</div>
-                      <div className="text-white/40 text-xs truncate">{secretary.status}</div>
+                      <div className="text-[#4ECDC4] text-xs font-medium truncate">{secretary.name.split(' ')[0]}</div>
+                      <div className="text-white/60 text-xs truncate">{secretary.status}</div>
                     </div>
                   </motion.button>
                 );
@@ -218,25 +214,26 @@ export function SecretaryWidget({ secretaries, onSecretaryClick }: SecretaryWidg
         )}
       </AnimatePresence>
 
-      {/* 主按钮 - Q版秘书形象 */}
+      {/* 主按钮 - Q版秘书形象（纯透明背景） */}
       <motion.button
-        className="relative"
+        className="relative office-btn bg-transparent border-none outline-none p-0 m-0"
+        style={{ background: 'none', backgroundColor: 'transparent' }}
         onClick={() => setIsExpanded(!isExpanded)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
-        {/* Q版秘书形象 */}
+        {/* Q版秘书形象 - 纯透明背景 */}
         <motion.div
-          className="relative"
+          className="relative bg-transparent"
+          style={{ background: 'transparent' }}
           animate={{
-            x: isExpanded ? 0 : 16,
             y: activeMessage ? [0, -4, 0] : 0,
           }}
           transition={{
-            x: { type: 'spring', stiffness: 300, damping: 25 },
             y: { duration: 0.5, repeat: activeMessage ? Infinity : 0, repeatDelay: 1 }
           }}
         >
+          {/* 秘书SVG - 纯头像无背景 */}
           <QSecretary type={currentSecretary?.type || 'business'} size={56} />
           
           {/* 未读消息徽章 */}
@@ -250,13 +247,6 @@ export function SecretaryWidget({ secretaries, onSecretaryClick }: SecretaryWidg
               <span className="text-[10px] text-white font-bold">{unreadCount}</span>
             </motion.div>
           )}
-        </motion.div>
-
-        {/* 悬停提示 */}
-        <motion.div
-          className="absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap bg-[#1e2936]/90 px-2 py-1 rounded-lg text-white/80 text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        >
-          秘书助理
         </motion.div>
       </motion.button>
     </div>

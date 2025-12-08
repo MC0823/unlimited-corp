@@ -1,7 +1,6 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
 	chatApp "unlimited-corp/internal/application/chat"
 	companyApp "unlimited-corp/internal/application/company"
 	employeeApp "unlimited-corp/internal/application/employee"
@@ -10,6 +9,8 @@ import (
 	userApp "unlimited-corp/internal/application/user"
 	"unlimited-corp/internal/interfaces/http/api"
 	"unlimited-corp/internal/interfaces/http/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Server HTTP服务器
@@ -45,6 +46,7 @@ func (s *Server) Setup(mode string) *gin.Engine {
 
 	// 全局中间件
 	s.engine.Use(middleware.Recovery())
+	s.engine.Use(middleware.RequestTracing()) // 链路追踪
 	s.engine.Use(middleware.Logger())
 	s.engine.Use(middleware.CORS())
 	s.engine.Use(middleware.ErrorHandler())

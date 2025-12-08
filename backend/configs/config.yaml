@@ -7,7 +7,7 @@ database:
   host: localhost
   port: 5432
   user: unlimited
-  password: unlimited123
+  password: "unlimited123"  # ⭐ 生产环境请通过环境变量 DB_PASSWORD 配置
   name: unlimited_corp
   sslmode: disable
   max_open_conns: 25
@@ -22,7 +22,7 @@ redis:
   pool_size: 10
 
 jwt:
-  secret: your-super-secret-jwt-key-change-in-production
+  secret: "dev-only-secret-do-not-use-in-production"  # ⚠️ 仅限开发！生产环境必须通过环境变量 JWT_SECRET 配置
   expires_in: 24h
   refresh_expires_in: 168h
 
@@ -41,7 +41,7 @@ kafka:
 
 minio:
   endpoint: localhost:9000
-  access_key: minioadmin
-  secret_key: minioadmin123
+  access_key: ""  # ⭐ 生产环境请通过环境变量 MINIO_ACCESS_KEY 配置
+  secret_key: ""  # ⭐ 生产环境请通过环境变量 MINIO_SECRET_KEY 配置
   bucket: unlimited-corp
   use_ssl: false

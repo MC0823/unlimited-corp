@@ -3,10 +3,11 @@ package api
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"unlimited-corp/internal/application/company"
 	"unlimited-corp/internal/interfaces/http/helpers"
 	"unlimited-corp/internal/interfaces/http/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 type CompanyHandler struct {
@@ -49,7 +50,7 @@ func (h *CompanyHandler) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"code": 201, "data": result})
+	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *CompanyHandler) GetMy(c *gin.Context) {
@@ -114,5 +115,5 @@ func (h *CompanyHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "company deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "company deleted successfully"})
 }

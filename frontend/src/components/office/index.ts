@@ -8,3 +8,8 @@ export { TaskBoardModal } from './TaskBoardModal';
 export { SecretaryModal } from './SecretaryModal';
 export { DataCenterModal } from './DataCenterModal';
 export { MarketModal } from './MarketModal';
+export { SecretaryWidget } from './SecretaryWidget';
+export { DepartmentManageModal } from './DepartmentManageModal';
+export { EmployeeListModal } from './EmployeeListModal';
+export { SkillManageModal } from './SkillManageModal';
+export { SkillCardWorkshop } from './SkillCardWorkshop';

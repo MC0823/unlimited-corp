@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	taskApp "unlimited-corp/internal/application/task"
 	taskDomain "unlimited-corp/internal/domain/task"
 	"unlimited-corp/internal/interfaces/http/middleware"
 	"unlimited-corp/pkg/errors"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type TaskHandler struct {
@@ -46,7 +47,7 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"code": 201, "data": result})
+	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *TaskHandler) List(c *gin.Context) {
@@ -65,7 +66,7 @@ func (h *TaskHandler) List(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *TaskHandler) GetByID(c *gin.Context) {
@@ -85,7 +86,7 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *TaskHandler) Update(c *gin.Context) {
@@ -111,7 +112,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *TaskHandler) UpdateStatus(c *gin.Context) {
@@ -139,7 +140,7 @@ func (h *TaskHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *TaskHandler) Delete(c *gin.Context) {
@@ -158,5 +159,5 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "task deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "task deleted successfully"})
 }

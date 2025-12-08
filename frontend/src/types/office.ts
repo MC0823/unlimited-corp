@@ -53,4 +53,4 @@ export interface Secretary {
   status: string;
 }
 
-export type ModalType = 'tasks' | 'secretary' | 'data' | 'market' | null;
+export type ModalType = 'department' | 'employee' | 'skill' | 'market' | null;

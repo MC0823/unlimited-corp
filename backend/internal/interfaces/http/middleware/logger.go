@@ -3,9 +3,10 @@ package middleware
 import (
 	"time"
 
+	"unlimited-corp/pkg/logger"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"unlimited-corp/pkg/logger"
 )
 
 // Logger 日志中间件
@@ -28,6 +29,14 @@ func Logger() gin.HandlerFunc {
 			zap.String("ip", c.ClientIP()),
 			zap.Duration("latency", latency),
 			zap.String("user-agent", c.Request.UserAgent()),
+		}
+
+		// 添加链路追踪信息
+		if requestID := GetRequestID(c); requestID != "" {
+			fields = append(fields, zap.String("request_id", requestID))
+		}
+		if traceID := GetTraceID(c); traceID != "" {
+			fields = append(fields, zap.String("trace_id", traceID))
 		}
 
 		if len(c.Errors) > 0 {

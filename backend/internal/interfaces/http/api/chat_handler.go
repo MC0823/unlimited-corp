@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	chatApp "unlimited-corp/internal/application/chat"
 	"unlimited-corp/internal/interfaces/http/middleware"
 	"unlimited-corp/pkg/errors"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ChatHandler struct {
@@ -46,7 +47,7 @@ func (h *ChatHandler) CreateSession(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"code": 201, "data": result})
+	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *ChatHandler) ListSessions(c *gin.Context) {
@@ -65,7 +66,7 @@ func (h *ChatHandler) ListSessions(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *ChatHandler) GetSession(c *gin.Context) {
@@ -85,7 +86,7 @@ func (h *ChatHandler) GetSession(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *ChatHandler) DeleteSession(c *gin.Context) {
@@ -104,7 +105,7 @@ func (h *ChatHandler) DeleteSession(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "session deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "session deleted successfully"})
 }
 
 func (h *ChatHandler) CreateMessage(c *gin.Context) {
@@ -120,7 +121,7 @@ func (h *ChatHandler) CreateMessage(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"code": 201, "data": result})
+	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "success", "data": result})
 }
 
 func (h *ChatHandler) ListMessages(c *gin.Context) {
@@ -139,5 +140,5 @@ func (h *ChatHandler) ListMessages(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": result})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": result})
 }

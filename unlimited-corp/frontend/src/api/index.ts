@@ -1,7 +1,0 @@
-export { default as apiClient } from './client'
-export * as authApi from './auth'
-export * as companyApi from './company'
-export * as skillcardApi from './skillcard'
-export * as employeeApi from './employee'
-export * as taskApi from './task'
-export * as chatApi from './chat'

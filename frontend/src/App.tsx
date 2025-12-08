@@ -7,6 +7,7 @@ import CompanyPage from './pages/CompanyPage'
 import EmployeePage from './pages/EmployeePage'
 import SkillCardPage from './pages/SkillCardPage'
 import OfficePage from './pages/OfficePage'
+import TaskPage from './pages/TaskPage'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -43,6 +44,9 @@ function App() {
         } />
         <Route path="/skillcards" element={
           isAuthenticated ? <SkillCardPage /> : <Navigate to="/login" replace />
+        } />
+        <Route path="/tasks" element={
+          isAuthenticated ? <TaskPage /> : <Navigate to="/login" replace />
         } />
       </Routes>
     </BrowserRouter>
