@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #ff4d4f;
+  /* 虚拟办公室主题色 */
+  --office-dark: #1a2332;
+  --office-darker: #0f1419;
+  --office-panel: #2a3f5f;
+  --office-blue: #3D7FFF;
+  --office-cyan: #4ECDC4;
+  --office-yellow: #FFD93D;
+  --office-pink: #FF6B9D;
+  --office-green: #A8E6CF;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* 虚拟办公室自定义滚动条 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(61, 127, 255, 0.5);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(61, 127, 255, 0.7);
+}
+
+/* 办公室页面滚动条 */
+.office-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.office-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.office-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(61, 127, 255, 0.4);
+  border-radius: 2px;
+}
+
+.office-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(61, 127, 255, 0.6);
+}
+
+/* 虚拟办公室按钮重置样式 - 覆盖 Ant Design */
+.office-btn {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+.office-btn:focus,
+.office-btn:active,
+.office-btn:hover {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
